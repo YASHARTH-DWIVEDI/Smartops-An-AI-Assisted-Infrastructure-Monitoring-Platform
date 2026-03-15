@@ -128,10 +128,10 @@ class GeminiClient:
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse Gemini JSON response: {e}")
-            raise GeminiUnavailableError(f"Invalid JSON from Gemini: {e}")
+            raise GeminiUnavailableError(f" Invalid JSON from Gemini: {e}")
         except Exception as e:
             logger.error(f"Gemini API error: {e}")
-            raise GeminiUnavailableError(f"Gemini API error: {e}")
+            raise GeminiUnavailableError(f" Gemini API error: {e}")
 
 
 class GeminiUnavailableError(Exception):
