@@ -20,7 +20,6 @@ logger = get_logger("ai_engine.diagnostics")
 class DiagnosticsEngine:
     """
     Unified entry point for AI-powered metric diagnosis.
-
     Tries Gemini first, falls back to rule-based engine.
     """
 
@@ -45,7 +44,6 @@ class DiagnosticsEngine:
     async def diagnose(self, metrics: dict, server_name: str) -> dict:
         """
         Analyze metrics and return a diagnosis dict.
-
         Returns dict compatible with DiagnoseResponse schema.
         """
         # Try Gemini first
