@@ -1,6 +1,5 @@
 """
 SmartOps Monitoring Agent — Production Version
-
 New in this version:
   - Server self-registration on startup (POST /servers/register)
   - Log collection every LOG_COLLECT_INTERVAL seconds
