@@ -1,6 +1,5 @@
 """
 SmartOps Dashboard v1.1 — Production NOC Interface
-
 New panels:
   - Server inventory with registration info
   - Incident history with severity + MTTR
