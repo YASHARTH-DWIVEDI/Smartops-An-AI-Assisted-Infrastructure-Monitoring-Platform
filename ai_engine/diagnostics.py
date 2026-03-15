@@ -1,6 +1,5 @@
 """
 Diagnostics Engine — dispatches to Gemini AI or rule-based fallback.
-
 Priority:
   1. Try Gemini if GEMINI_API_KEY is set
   2. Fall back to rule-based engine on any error
