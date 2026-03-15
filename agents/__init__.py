@@ -1,1 +1,1 @@
-
+"""SmartOps monitoring agent package."""
