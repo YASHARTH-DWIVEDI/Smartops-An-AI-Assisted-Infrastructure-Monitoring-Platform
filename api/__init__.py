@@ -1,1 +1,0 @@
-"""SmartOps FastAPI backend package."""
