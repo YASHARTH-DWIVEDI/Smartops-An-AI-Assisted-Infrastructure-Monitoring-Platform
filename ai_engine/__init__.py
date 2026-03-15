@@ -1,1 +1,1 @@
-"""SmartOps AI diagnostic engine."""
+"""SmartOps AI Diagnostic Engine."""
