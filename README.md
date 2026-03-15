@@ -37,58 +37,6 @@
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## 📁 Project Structure
-
-```
-smartops/
-├── agent/
-│   ├── agent.py          # Main agent loop (runs every 10s)
-│   ├── collector.py      # psutil metric collection
-│   ├── sender.py         # HTTP sender with retry logic
-│   └── config.py         # Agent configuration
-├── api/
-│   ├── main.py           # FastAPI app entry point
-│   ├── config.py         # API configuration
-│   ├── routers/
-│   │   ├── metrics.py    # POST /metrics, GET /metrics
-│   │   └── alerts.py     # GET /alerts
-│   ├── models/
-│   │   └── schemas.py    # Pydantic request/response schemas
-│   ├── database/
-│   │   ├── models.py     # SQLAlchemy ORM models
-│   │   └── session.py    # DB session management
-│   └── services/
-│       ├── metrics_service.py  # Business logic for metrics
-│       └── alert_service.py   # Alert evaluation & storage
-├── dashboard/
-│   └── app.py            # Streamlit dashboard
-├── ai_engine/
-│   ├── diagnostics.py    # Main AI dispatcher
-│   ├── gemini_client.py  # Google Gemini integration
-│   └── rules.py          # Fallback rule-based engine
-├── config/
-│   └── settings.yml      # Central configuration file
-├── docker/
-│   ├── Dockerfile.api    # API container
-│   ├── Dockerfile.agent  # Agent container
-│   └── docker-compose.yml
-├── tests/
-│   ├── test_collector.py
-│   ├── test_api.py
-│   └── test_ai_engine.py
-├── docs/
-│   └── architecture.md
-├── scripts/
-│   ├── run_all.sh        # Start everything locally
-│   └── seed_data.py      # Generate test data
-├── .env.example
-├── requirements.txt
-├── requirements-agent.txt
-└── docker-compose.yml    # Root compose file
-```
-
----
-
 ## 🚀 Quick Start
 
 ### Option 1: Docker (Recommended)
@@ -187,6 +135,3 @@ pytest tests/ -v --tb=short
 
 ---
 
-## 📝 License
-
-MIT
