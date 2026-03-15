@@ -4,7 +4,7 @@
  Collects server metrics, stores them in a database, visualizes trends, fires alerts, and uses AI to diagnose anomalies.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-red.svg)](https://streamlit.io/)
+[![Streamlit](https://img.shields.io/badge/Replit-red.svg)](https://Replit.com/)
 [![Docker](https://img.shields.io/badge/docker-compose-blue.svg)](https://docs.docker.com/compose/)
 
 ---
