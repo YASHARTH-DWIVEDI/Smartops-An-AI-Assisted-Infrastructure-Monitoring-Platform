@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+LABEL description="SmartOps Monitoring Agent"
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends procps && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-agent.txt .
+RUN pip install --no-cache-dir -r requirements-agent.txt
+
+COPY agent/   ./agent/
+COPY shared/  ./shared/
+COPY config/  ./config/
+
+RUN mkdir -p logs
+
+RUN useradd -m -u 1000 smartops && chown -R smartops:smartops /app
+USER smartops
+
+CMD ["python", "-m", "agent.agent"]
