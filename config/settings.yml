@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────
+# SmartOps Central Configuration
+# Values here are overridden by environment variables
+# ─────────────────────────────────────────────
+
+app:
+  name: SmartOps
+  version: "1.0.0"
+  environment: development  # development | staging | production
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  reload: true              # False in production
+  cors_origins:
+    - "http://localhost:8501"
+    - "http://localhost:3000"
+
+database:
+  url: "sqlite:///./smartops.db"
+  pool_size: 5
+  max_overflow: 10
+  echo: false               # True for SQL query logging
+
+agent:
+  api_url: "http://localhost:8000"
+  interval_seconds: 10
+  server_name: ""           # Auto-detected from hostname if empty
+  retry_attempts: 3
+  retry_delay_seconds: 5
+  timeout_seconds: 10
+
+alerts:
+  thresholds:
+    cpu_percent: 90
+    memory_percent: 90
+    disk_percent: 85
+  cooldown_minutes: 15      # Avoid alert spam
+  email:
+    enabled: false
+    smtp_host: ""
+    smtp_port: 587
+    use_tls: true
+    from_addr: ""
+    to_addrs: []
+
+ai:
+  provider: "gemini"        # gemini | openai | rules
+  fallback_to_rules: true   # Use rules if API fails
+  model: "gemini-pro"
+  max_tokens: 1024
+
+logging:
+  level: INFO               # DEBUG | INFO | WARNING | ERROR
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file: "logs/smartops.log"
+  max_bytes: 10485760       # 10 MB
+  backup_count: 5
+
+dashboard:
+  api_url: "http://localhost:8000"
+  refresh_interval: 30      # seconds
+  max_data_points: 500      # Max points on charts
+  theme: dark
