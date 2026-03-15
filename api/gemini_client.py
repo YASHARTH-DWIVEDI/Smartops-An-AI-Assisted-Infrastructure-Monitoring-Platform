@@ -1,4 +1,5 @@
 """
+
 Google Gemini AI Client for SmartOps diagnostics.
 
 Sends metric context to Gemini and parses the structured response.
@@ -41,6 +42,7 @@ Respond ONLY with a valid JSON object with this exact structure:
 
 Be specific and actionable. Include actual Linux commands in recommendations where appropriate.
 """
+
 
 
 class GeminiClient:
@@ -114,7 +116,7 @@ class GeminiClient:
                 if key not in parsed:
                     raise ValueError(f"Missing key in Gemini response: {key}")
 
-            logger.info(f"Gemini diagnosis complete for {server_name}: severity={parsed['severity']}")
+            logger.info(f" Gemini diagnosis complete for {server_name}: severity={parsed['severity']}")
 
             return {
                 "server_name": server_name,
