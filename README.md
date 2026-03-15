@@ -1,0 +1,2 @@
+# Smartops-An-AI-Assisted-Infrastructure-Monitoring-Platform
+It is a lightweight infrastructure monitoring platform built to understand how real DevOps monitoring systems work. A Python agent collects system metrics such as CPU, memory, disk, and network usage and sends them to a FastAPI backend. The data is stored in a database and visualized using a Streamlit dashboard with basic alerting and diagnostics.
