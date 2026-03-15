@@ -1,0 +1,139 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────
+# SmartOps — Full Production Stack
+# Services: postgres, api, dashboard, agent
+#
+# Usage:
+#   docker-compose up --build          # start everything
+#   docker-compose up api dashboard    # start without agent
+#   docker-compose logs -f api         # tail API logs
+# ─────────────────────────────────────────────────────────────
+
+services:
+
+  # ── PostgreSQL Database ─────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartops-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-smartops}
+      POSTGRES_USER:     ${POSTGRES_USER:-smartops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smartops_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - smartops_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartops} -d ${POSTGRES_DB:-smartops}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── API Server ─────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: smartops-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      SMARTOPS_ENV:            production
+      DATABASE_URL:            postgresql://${POSTGRES_USER:-smartops}:${POSTGRES_PASSWORD:-smartops_secret}@postgres:5432/${POSTGRES_DB:-smartops}
+      API_HOST:                0.0.0.0
+      API_PORT:                "8000"
+      SMARTOPS_API_KEY:        ${SMARTOPS_API_KEY:-}
+      LOG_LEVEL:               ${LOG_LEVEL:-INFO}
+      LOG_FILE:                /data/logs/api.log
+      ALERT_CPU_THRESHOLD:     ${ALERT_CPU_THRESHOLD:-90}
+      ALERT_MEMORY_THRESHOLD:  ${ALERT_MEMORY_THRESHOLD:-90}
+      ALERT_DISK_THRESHOLD:    ${ALERT_DISK_THRESHOLD:-85}
+      ALERT_COOLDOWN_MINUTES:  ${ALERT_COOLDOWN_MINUTES:-15}
+      GEMINI_API_KEY:          ${GEMINI_API_KEY:-}
+      SMTP_HOST:               ${SMTP_HOST:-}
+      SMTP_PORT:               ${SMTP_PORT:-587}
+      SMTP_USERNAME:           ${SMTP_USERNAME:-}
+      SMTP_PASSWORD:           ${SMTP_PASSWORD:-}
+      ALERT_EMAIL_FROM:        ${ALERT_EMAIL_FROM:-}
+      ALERT_EMAIL_TO:          ${ALERT_EMAIL_TO:-}
+    volumes:
+      - smartops_data:/data
+    networks:
+      - smartops_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Streamlit Dashboard ─────────────────────
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: smartops-dashboard
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      AGENT_API_URL:       http://api:8000
+      SMARTOPS_API_KEY:    ${SMARTOPS_API_KEY:-}
+      DASHBOARD_REFRESH:   "30"
+    networks:
+      - smartops_net
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # ── Monitoring Agent (monitors Docker host) ─
+  agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    container_name: smartops-agent
+    restart: unless-stopped
+    pid: "host"
+    privileged: true
+    environment:
+      AGENT_API_URL:        http://api:8000
+      AGENT_INTERVAL:       "10"
+      AGENT_SERVER_NAME:    docker-host
+      SMARTOPS_API_KEY:     ${SMARTOPS_API_KEY:-}
+      LOG_LEVEL:            ${LOG_LEVEL:-INFO}
+      LOG_FILE:             /logs/agent.log
+      AGENT_BUFFER_FILE:    /logs/agent_buffer.ndjson
+      LOG_COLLECT_INTERVAL: "30"
+    volumes:
+      - smartops_logs:/logs
+      - /var/log:/host/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - smartops_net
+    depends_on:
+      api:
+        condition: service_healthy
+
+# ── Volumes ─────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+  smartops_data:
+    driver: local
+  smartops_logs:
+    driver: local
+
+# ── Networks ─────────────────────────────────
+networks:
+  smartops_net:
+    driver: bridge

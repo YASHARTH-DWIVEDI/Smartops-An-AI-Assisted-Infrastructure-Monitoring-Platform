@@ -1,88 +1,68 @@
-# ─────────────────────────────────────────────────────────────────────────────
-#  SmartOps — Makefile
-#  Convenience targets for local development
-# ─────────────────────────────────────────────────────────────────────────────
+.PHONY: install api agent dashboard test coverage lint format docker-up docker-down seed help
 
-.PHONY: help install api agent dashboard test lint clean docker-up docker-down
+help:  ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
+	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-# Default target
-help:
-	@echo ""
-	@echo "  SmartOps Development Commands"
-	@echo "  ─────────────────────────────"
-	@echo "  make install      Install Python dependencies"
-	@echo "  make api          Start the FastAPI backend"
-	@echo "  make agent        Start the monitoring agent"
-	@echo "  make dashboard    Start the Streamlit dashboard"
-	@echo "  make test         Run the test suite"
-	@echo "  make lint         Run ruff linter"
-	@echo "  make clean        Remove __pycache__ and .db files"
-	@echo "  make docker-up    Start all services via Docker Compose"
-	@echo "  make docker-down  Stop all Docker services"
-	@echo ""
-
-# ── Setup ─────────────────────────────────────────────────────────────────────
-
-install:
-	pip install --upgrade pip
+install:  ## Install all dependencies
 	pip install -r requirements.txt
+
+setup:  ## First-time setup (copy .env, install deps, create log dir)
 	cp -n .env.example .env || true
+	pip install -r requirements.txt
 	mkdir -p logs
+	@echo "✅ Setup complete. Edit .env then run: make api"
 
-# ── Run services ──────────────────────────────────────────────────────────────
+api:  ## Start the FastAPI backend
+	cd api && uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-api:
-	uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+agent:  ## Start the monitoring agent
+	cd agent && python agent.py
 
-agent:
-	python -m agent.agent
+dashboard:  ## Start the Streamlit dashboard
+	cd dashboard && streamlit run app.py --server.port 8501
 
-dashboard:
-	streamlit run dashboard/app.py
+all:  ## Start all services (requires tmux or run in separate terminals)
+	bash scripts/run_all.sh
 
-# Run all three in parallel (requires tmux or multiple terminals in CI)
-run-all:
-	@echo "Starting all services in background..."
-	@uvicorn api.main:app --host 0.0.0.0 --port 8000 &
-	@sleep 2
-	@python -m agent.agent &
-	@streamlit run dashboard/app.py
+seed:  ## Seed database with test data
+	python scripts/seed_data.py --servers 2 --hours 6
 
-# ── Testing ───────────────────────────────────────────────────────────────────
+test:  ## Run test suite
+	pytest tests/ -v --tb=short
 
-test:
-	pytest tests/ -v
+coverage:  ## Run tests with coverage report
+	pytest tests/ -v --cov=. --cov-report=term-missing --cov-report=html
 
-test-coverage:
-	pytest tests/ --cov=. --cov-report=html --cov-report=term-missing
+lint:  ## Lint with flake8
+	flake8 api/ agent/ ai_engine/ shared/ --max-line-length=100 --extend-ignore=E203
 
-# ── Code quality ──────────────────────────────────────────────────────────────
+format:  ## Format with black
+	black api/ agent/ ai_engine/ shared/ tests/ --line-length=100
 
-lint:
-	ruff check . --fix
+docker-up:  ## Start with Docker Compose
+	docker-compose up --build
 
-format:
-	ruff format .
+docker-down:  ## Stop Docker Compose services
+	docker-compose down
 
-# ── Docker ────────────────────────────────────────────────────────────────────
+docker-logs:  ## Tail Docker logs
+	docker-compose logs -f
 
-docker-up:
-	docker-compose -f docker/docker-compose.yml up --build
+clean:  ## Remove build artifacts and cache
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -name "*.pyc" -delete
+	rm -rf .pytest_cache htmlcov .coverage smartops.db
 
-docker-up-d:
-	docker-compose -f docker/docker-compose.yml up --build -d
+.DEFAULT_GOAL := help
 
-docker-down:
-	docker-compose -f docker/docker-compose.yml down
+# ── Additional targets ───────────────────────
+test-new:  ## Run only new/added tests
+	pytest tests/test_server_service.py tests/test_incident_service.py \
+	       tests/test_auth.py tests/test_retry.py tests/test_log_collector.py -v
 
-docker-logs:
-	docker-compose -f docker/docker-compose.yml logs -f
+docker-postgres:  ## Start only postgres (for local dev with local API)
+	docker-compose up postgres -d
 
-# ── Cleanup ───────────────────────────────────────────────────────────────────
-
-clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete
-	find . -type f -name "*.db" -delete
-	rm -rf .pytest_cache htmlcov .coverage
-	@echo "Clean complete."
+gen-key:  ## Generate a random API key
+	@python3 -c "import secrets; print(secrets.token_urlsafe(32))"
