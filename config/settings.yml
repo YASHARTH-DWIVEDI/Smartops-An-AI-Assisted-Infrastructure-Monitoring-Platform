@@ -46,7 +46,7 @@ alerts:
     to_addrs: []
 
 ai:
-  provider: "gemini"        # gemini | openai | rules
+  provider: "gemini"        # gemini, openai, rules
   fallback_to_rules: true   # Use rules if API fails
   model: "gemini-pro"
   max_tokens: 1024
@@ -60,6 +60,6 @@ logging:
 
 dashboard:
   api_url: "http://localhost:8000"
-  refresh_interval: 30      # seconds
+  refresh_interval: 25      # seconds
   max_data_points: 500      # Max points on charts
   theme: dark
