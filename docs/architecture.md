@@ -222,7 +222,7 @@ DiagnosticsEngine
 make setup && make all
 ```
 
-### Docker Compose (Recommended)
+### Docker Compose
 ```bash
 docker-compose up --build
 ```
