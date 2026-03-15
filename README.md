@@ -1,8 +1,7 @@
-# SmartOps 🖥️ — AI-Assisted Infrastructure Monitoring Platform
+# SmartOps — An AI-Assisted Infrastructure Monitoring Platform
 
-> A production-like internal IT monitoring system for infrastructure teams.
-> Collects server metrics, stores them in a database, visualizes trends, fires alerts,
-> and uses AI to diagnose anomalies.
+ A production-like internal IT monitoring system for infrastructure teams.
+ Collects server metrics, stores them in a database, visualizes trends, fires alerts, and uses AI to diagnose anomalies.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-red.svg)](https://streamlit.io/)
