@@ -60,6 +60,6 @@ logging:
 
 dashboard:
   api_url: "http://localhost:8000"
-  refresh_interval: 25      # seconds
+  refresh_interval: 30      # seconds
   max_data_points: 500      # Max points on charts
   theme: dark
